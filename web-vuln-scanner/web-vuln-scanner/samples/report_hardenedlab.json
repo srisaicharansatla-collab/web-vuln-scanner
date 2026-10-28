@@ -1,0 +1,104 @@
+{
+  "tool": {
+    "name": "vulnscan",
+    "version": "1.0.0"
+  },
+  "target": "http://127.0.0.1:8082",
+  "started_at": "2026-10-28T18:11:35+00:00",
+  "duration_seconds": 2.46,
+  "stats": {
+    "pages_crawled": 6,
+    "requests_sent": 50,
+    "request_errors": 0,
+    "checks_run": [
+      "A02-HTTP",
+      "A02-HSTS",
+      "A02-MIXED",
+      "A02-COOKIE-SECURE",
+      "A07-COOKIE-FLAGS",
+      "A07-LOGIN-HTTP",
+      "A05-HEADERS",
+      "A05-FILES",
+      "A05-DIRLIST",
+      "A05-TRACE",
+      "A06-VERSION",
+      "A08-SRI",
+      "A01-CSRF",
+      "A01-REDIR",
+      "A01-CORS",
+      "A01-TRAV",
+      "A03-SQLI",
+      "A03-XSS"
+    ]
+  },
+  "summary": {
+    "total": 3,
+    "by_severity": {
+      "Critical": 0,
+      "High": 0,
+      "Medium": 1,
+      "Low": 2,
+      "Info": 0
+    },
+    "by_owasp": {
+      "A02:2021 Cryptographic Failures": 1,
+      "A01:2021 Broken Access Control": 1,
+      "A05:2021 Security Misconfiguration": 1
+    }
+  },
+  "findings": [
+    {
+      "check_id": "A02-HTTP",
+      "title": "Site is served over HTTP instead of HTTPS",
+      "severity": "Medium",
+      "owasp": "A02:2021 Cryptographic Failures",
+      "url": "http://127.0.0.1:8082",
+      "evidence": "Scheme of target is 'http' (expected for a local lab, critical for a production site). Credentials, cookies and content travel unencrypted.",
+      "recommendation": "Serve the whole site over HTTPS (TLS 1.2+), redirect HTTP to HTTPS with a 301 and enable HSTS.",
+      "parameter": null
+    },
+    {
+      "check_id": "A01-CORS",
+      "title": "CORS allows any origin (wildcard)",
+      "severity": "Low",
+      "owasp": "A01:2021 Broken Access Control",
+      "url": "http://127.0.0.1:8082/api/public",
+      "evidence": "Access-Control-Allow-Origin: * (acceptable only for fully public, non-credentialed data).",
+      "recommendation": "Restrict to the origins that need access if the response is not public.",
+      "parameter": null
+    },
+    {
+      "check_id": "A05-HEADERS",
+      "title": "Referrer-Policy header missing",
+      "severity": "Low",
+      "owasp": "A05:2021 Security Misconfiguration",
+      "url": "http://127.0.0.1:8082",
+      "evidence": "Header 'Referrer-Policy' absent on 5/5 HTML pages (e.g. http://127.0.0.1:8082/).",
+      "recommendation": "Send 'Referrer-Policy: strict-origin-when-cross-origin' (or stricter).",
+      "parameter": null
+    }
+  ],
+  "not_tested": [
+    {
+      "category": "A04:2021 Insecure Design",
+      "reason": "Design flaws and business-logic abuse need understanding of intended behaviour; a generic scanner cannot judge them."
+    },
+    {
+      "category": "A09:2021 Security Logging and Monitoring Failures",
+      "reason": "Logging, alerting and incident response happen server-side and are invisible to a remote, read-only client. Review log configuration and alert rules manually."
+    },
+    {
+      "category": "A10:2021 Server-Side Request Forgery",
+      "reason": "SSRF needs an out-of-band callback server or a harmful internal target to confirm safely; this tool does not send such payloads."
+    }
+  ],
+  "limitations": [
+    "Static HTML crawler: JavaScript-rendered single-page apps (e.g. Juice Shop) expose few links/forms.",
+    "Only GET parameters and GET forms are fuzzed by default (POST needs --allow-post).",
+    "No authentication, so everything behind a login is out of scope.",
+    "Blind/time-based SQLi, DOM-based XSS, IDOR and business-logic flaws are not detected.",
+    "Signature-based detection can miss custom error pages and may flag documentation pages that quote error text."
+  ],
+  "check_errors": [],
+  "request_error_samples": []
+}

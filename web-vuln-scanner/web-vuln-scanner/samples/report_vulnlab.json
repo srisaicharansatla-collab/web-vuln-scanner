@@ -1,0 +1,348 @@
+{
+  "tool": {
+    "name": "vulnscan",
+    "version": "1.0.0"
+  },
+  "target": "http://127.0.0.1:8081",
+  "started_at": "2026-10-28T18:11:31+00:00",
+  "duration_seconds": 3.16,
+  "stats": {
+    "pages_crawled": 14,
+    "requests_sent": 64,
+    "request_errors": 0,
+    "checks_run": [
+      "A02-HTTP",
+      "A02-HSTS",
+      "A02-MIXED",
+      "A02-COOKIE-SECURE",
+      "A07-COOKIE-FLAGS",
+      "A07-LOGIN-HTTP",
+      "A05-HEADERS",
+      "A05-FILES",
+      "A05-DIRLIST",
+      "A05-TRACE",
+      "A06-VERSION",
+      "A08-SRI",
+      "A01-CSRF",
+      "A01-REDIR",
+      "A01-CORS",
+      "A01-TRAV",
+      "A03-SQLI",
+      "A03-XSS"
+    ]
+  },
+  "summary": {
+    "total": 27,
+    "by_severity": {
+      "Critical": 1,
+      "High": 6,
+      "Medium": 14,
+      "Low": 6,
+      "Info": 0
+    },
+    "by_owasp": {
+      "A05:2021 Security Misconfiguration": 9,
+      "A01:2021 Broken Access Control": 5,
+      "A03:2021 Injection": 2,
+      "A07:2021 Identification and Authentication Failures": 5,
+      "A02:2021 Cryptographic Failures": 3,
+      "A06:2021 Vulnerable and Outdated Components": 2,
+      "A08:2021 Software and Data Integrity Failures": 1
+    }
+  },
+  "findings": [
+    {
+      "check_id": "A05-FILES",
+      "title": "Exposed Environment file with secrets",
+      "severity": "Critical",
+      "owasp": "A05:2021 Security Misconfiguration",
+      "url": "http://127.0.0.1:8081/.env",
+      "evidence": "HTTP 200, Content-Type 'text/plain', 77 bytes, content signature for 'Environment file with secrets' matched (values redacted).",
+      "recommendation": "Remove the file from the web root or deny access in the web server config; rotate any secrets that were exposed.",
+      "parameter": null
+    },
+    {
+      "check_id": "A01-CORS",
+      "title": "CORS reflects arbitrary Origin with credentials",
+      "severity": "High",
+      "owasp": "A01:2021 Broken Access Control",
+      "url": "http://127.0.0.1:8081/api/data",
+      "evidence": "Origin: https://evil.vulnscan.invalid -> Access-Control-Allow-Origin: https://evil.vulnscan.invalid; Allow-Credentials: True",
+      "recommendation": "Validate Origin against a strict allow-list; never combine reflected origins with credentials.",
+      "parameter": null
+    },
+    {
+      "check_id": "A01-TRAV",
+      "title": "Path traversal indicator (OS file signature in response)",
+      "severity": "High",
+      "owasp": "A01:2021 Broken Access Control",
+      "url": "http://127.0.0.1:8081/view",
+      "evidence": "Parameter 'file' with '../../../../../../etc/passwd' returned content matching the signature 'root:[x*!]?:0:0:'. (File contents are intentionally not stored in this report.)",
+      "recommendation": "Never build file paths from user input; map IDs to files via an allow-list, canonicalise the path and verify it stays inside the intended base directory.",
+      "parameter": "file"
+    },
+    {
+      "check_id": "A03-SQLI",
+      "title": "Possible SQL injection (MySQL error message)",
+      "severity": "High",
+      "owasp": "A03:2021 Injection",
+      "url": "http://127.0.0.1:8081/product",
+      "evidence": "Appending \"'\" to 'id' produced a database error: \"You have an error in your SQL syntax\" (HTTP 500); the baseline response had no such error.",
+      "recommendation": "Use parameterised queries / prepared statements, validate input types, and show generic error pages.",
+      "parameter": "id"
+    },
+    {
+      "check_id": "A03-XSS",
+      "title": "Reflected XSS: input echoed without HTML encoding",
+      "severity": "High",
+      "owasp": "A03:2021 Injection",
+      "url": "http://127.0.0.1:8081/search",
+      "evidence": "Marker 'vsxc36debe9<b>' sent in 'q' was reflected unescaped in an HTML response (HTTP 200). Only a harmless marker was used.",
+      "recommendation": "Contextually HTML-encode all output, use an auto-escaping template engine and add a restrictive Content-Security-Policy.",
+      "parameter": "q"
+    },
+    {
+      "check_id": "A05-FILES",
+      "title": "Exposed Git repository metadata",
+      "severity": "High",
+      "owasp": "A05:2021 Security Misconfiguration",
+      "url": "http://127.0.0.1:8081/.git/HEAD",
+      "evidence": "HTTP 200, Content-Type 'text/plain', 21 bytes, content signature for 'Git repository metadata' matched (signature matched).",
+      "recommendation": "Remove the file from the web root or deny access in the web server config; rotate any secrets that were exposed.",
+      "parameter": null
+    },
+    {
+      "check_id": "A07-LOGIN-HTTP",
+      "title": "Login form transmits credentials over HTTP",
+      "severity": "High",
+      "owasp": "A07:2021 Identification and Authentication Failures",
+      "url": "http://127.0.0.1:8081/login",
+      "evidence": "Form with password field (action=http://127.0.0.1:8081/login, method=POST) is not protected by TLS.",
+      "recommendation": "Serve the login page and the form action over HTTPS only and redirect all HTTP requests.",
+      "parameter": null
+    },
+    {
+      "check_id": "A01-CSRF",
+      "title": "POST form has no anti-CSRF token",
+      "severity": "Medium",
+      "owasp": "A01:2021 Broken Access Control",
+      "url": "http://127.0.0.1:8081/comment",
+      "evidence": "Form on http://127.0.0.1:8081/ (method=POST, fields: author, text) contains no field resembling a CSRF token.",
+      "recommendation": "Add a per-session unpredictable CSRF token validated on the server (or use the double-submit cookie pattern) and set SameSite=Lax/Strict on session cookies.",
+      "parameter": null
+    },
+    {
+      "check_id": "A01-CSRF",
+      "title": "POST form has no anti-CSRF token",
+      "severity": "Medium",
+      "owasp": "A01:2021 Broken Access Control",
+      "url": "http://127.0.0.1:8081/login",
+      "evidence": "Form on http://127.0.0.1:8081/login (method=POST, fields: user, pass) contains no field resembling a CSRF token.",
+      "recommendation": "Add a per-session unpredictable CSRF token validated on the server (or use the double-submit cookie pattern) and set SameSite=Lax/Strict on session cookies.",
+      "parameter": null
+    },
+    {
+      "check_id": "A01-REDIR",
+      "title": "Open redirect via parameter",
+      "severity": "Medium",
+      "owasp": "A01:2021 Broken Access Control",
+      "url": "http://127.0.0.1:8081/redirect",
+      "evidence": "HTTP 302 with Location: https://vulnscan-canary.invalid/redirect-test when 'next' was set to an external canary URL.",
+      "recommendation": "Only redirect to relative paths or to an allow-list of hosts; never trust a user-supplied URL.",
+      "parameter": "next"
+    },
+    {
+      "check_id": "A02-HTTP",
+      "title": "Site is served over HTTP instead of HTTPS",
+      "severity": "Medium",
+      "owasp": "A02:2021 Cryptographic Failures",
+      "url": "http://127.0.0.1:8081",
+      "evidence": "Scheme of target is 'http' (expected for a local lab, critical for a production site). Credentials, cookies and content travel unencrypted.",
+      "recommendation": "Serve the whole site over HTTPS (TLS 1.2+), redirect HTTP to HTTPS with a 301 and enable HSTS.",
+      "parameter": null
+    },
+    {
+      "check_id": "A05-DIRLIST",
+      "title": "Directory listing enabled",
+      "severity": "Medium",
+      "owasp": "A05:2021 Security Misconfiguration",
+      "url": "http://127.0.0.1:8081/uploads/",
+      "evidence": "Response contains an 'Index of /' style listing of files.",
+      "recommendation": "Disable auto-indexing (Apache: Options -Indexes; nginx: autoindex off) and add an index file.",
+      "parameter": null
+    },
+    {
+      "check_id": "A05-FILES",
+      "title": "Exposed phpinfo() page",
+      "severity": "Medium",
+      "owasp": "A05:2021 Security Misconfiguration",
+      "url": "http://127.0.0.1:8081/phpinfo.php",
+      "evidence": "HTTP 200, Content-Type 'text/html; charset=utf-8', 90 bytes, content signature for 'phpinfo() page' matched (signature matched).",
+      "recommendation": "Remove the file from the web root or deny access in the web server config; rotate any secrets that were exposed.",
+      "parameter": null
+    },
+    {
+      "check_id": "A05-HEADERS",
+      "title": "Content-Security-Policy header missing",
+      "severity": "Medium",
+      "owasp": "A05:2021 Security Misconfiguration",
+      "url": "http://127.0.0.1:8081",
+      "evidence": "Header 'Content-Security-Policy' absent on 10/10 HTML pages (e.g. http://127.0.0.1:8081/).",
+      "recommendation": "Define a restrictive CSP (e.g. default-src 'self'; object-src 'none'; frame-ancestors 'none') to limit the impact of XSS.",
+      "parameter": null
+    },
+    {
+      "check_id": "A05-HEADERS",
+      "title": "Clickjacking protection missing (X-Frame-Options / frame-ancestors)",
+      "severity": "Medium",
+      "owasp": "A05:2021 Security Misconfiguration",
+      "url": "http://127.0.0.1:8081",
+      "evidence": "Header 'X-Frame-Options' absent on 10/10 HTML pages (e.g. http://127.0.0.1:8081/).",
+      "recommendation": "Send 'X-Frame-Options: DENY' (or SAMEORIGIN) or CSP 'frame-ancestors'.",
+      "parameter": null
+    },
+    {
+      "check_id": "A05-TRACE",
+      "title": "Python traceback disclosed in response",
+      "severity": "Medium",
+      "owasp": "A05:2021 Security Misconfiguration",
+      "url": "http://127.0.0.1:8081/error",
+      "evidence": "Signature 'Python traceback' matched: \"Traceback (most recent call last)\"",
+      "recommendation": "Disable debug mode, return generic error pages and log details server-side only.",
+      "parameter": null
+    },
+    {
+      "check_id": "A06-VERSION",
+      "title": "Version disclosed in 'Server' header",
+      "severity": "Medium",
+      "owasp": "A06:2021 Vulnerable and Outdated Components",
+      "url": "http://127.0.0.1:8081/",
+      "evidence": "Server: Apache/2.4.49 (Unix). Known issue hint (verify, may be back-ported): Apache httpd 2.4.49/2.4.50: CVE-2021-41773 / CVE-2021-42013 (path traversal, possible RCE).",
+      "recommendation": "Hide version banners (Apache: ServerTokens Prod; nginx: server_tokens off; PHP: expose_php=Off) and keep components patched.",
+      "parameter": "Server"
+    },
+    {
+      "check_id": "A06-VERSION",
+      "title": "Version disclosed in 'X-Powered-By' header",
+      "severity": "Medium",
+      "owasp": "A06:2021 Vulnerable and Outdated Components",
+      "url": "http://127.0.0.1:8081/",
+      "evidence": "X-Powered-By: PHP/5.6.40. Known issue hint (verify, may be back-ported): PHP < 7.4 is end-of-life and no longer receives security fixes.",
+      "recommendation": "Hide version banners (Apache: ServerTokens Prod; nginx: server_tokens off; PHP: expose_php=Off) and keep components patched.",
+      "parameter": "X-Powered-By"
+    },
+    {
+      "check_id": "A07-COOKIE-FLAGS",
+      "title": "Cookie 'PHPSESSID' set without HttpOnly flag",
+      "severity": "Medium",
+      "owasp": "A07:2021 Identification and Authentication Failures",
+      "url": "http://127.0.0.1:8081/",
+      "evidence": "Set-Cookie attributes seen: path",
+      "recommendation": "Add 'HttpOnly' so JavaScript (and therefore XSS payloads) cannot read the cookie.",
+      "parameter": "PHPSESSID"
+    },
+    {
+      "check_id": "A07-COOKIE-FLAGS",
+      "title": "Cookie 'PHPSESSID' set without SameSite attribute",
+      "severity": "Medium",
+      "owasp": "A07:2021 Identification and Authentication Failures",
+      "url": "http://127.0.0.1:8081/",
+      "evidence": "Set-Cookie attributes seen: path",
+      "recommendation": "Add 'SameSite=Lax' (or Strict) to limit cross-site sending and reduce CSRF risk.",
+      "parameter": "PHPSESSID"
+    },
+    {
+      "check_id": "A08-SRI",
+      "title": "External script loaded without Subresource Integrity",
+      "severity": "Medium",
+      "owasp": "A08:2021 Software and Data Integrity Failures",
+      "url": "http://127.0.0.1:8081/",
+      "evidence": "https://cdn.example.com/lib.js has no 'integrity' attribute (included from http://127.0.0.1:8081/).",
+      "recommendation": "Add integrity=\"sha384-...\" and crossorigin=\"anonymous\" to third-party resources, or self-host them.",
+      "parameter": "https://cdn.example.com/lib.js"
+    },
+    {
+      "check_id": "A02-COOKIE-SECURE",
+      "title": "Cookie 'PHPSESSID' set without Secure flag",
+      "severity": "Low",
+      "owasp": "A02:2021 Cryptographic Failures",
+      "url": "http://127.0.0.1:8081/",
+      "evidence": "Set-Cookie: PHPSESSID=<redacted>; path",
+      "recommendation": "Add the 'Secure' attribute so the cookie is only sent over HTTPS.",
+      "parameter": "PHPSESSID"
+    },
+    {
+      "check_id": "A02-COOKIE-SECURE",
+      "title": "Cookie 'theme' set without Secure flag",
+      "severity": "Low",
+      "owasp": "A02:2021 Cryptographic Failures",
+      "url": "http://127.0.0.1:8081/",
+      "evidence": "Set-Cookie: theme=<redacted>; path",
+      "recommendation": "Add the 'Secure' attribute so the cookie is only sent over HTTPS.",
+      "parameter": "theme"
+    },
+    {
+      "check_id": "A05-HEADERS",
+      "title": "X-Content-Type-Options: nosniff missing",
+      "severity": "Low",
+      "owasp": "A05:2021 Security Misconfiguration",
+      "url": "http://127.0.0.1:8081",
+      "evidence": "Header 'X-Content-Type-Options' absent on 10/10 HTML pages (e.g. http://127.0.0.1:8081/).",
+      "recommendation": "Send 'X-Content-Type-Options: nosniff' to stop MIME-type sniffing.",
+      "parameter": null
+    },
+    {
+      "check_id": "A05-HEADERS",
+      "title": "Referrer-Policy header missing",
+      "severity": "Low",
+      "owasp": "A05:2021 Security Misconfiguration",
+      "url": "http://127.0.0.1:8081",
+      "evidence": "Header 'Referrer-Policy' absent on 10/10 HTML pages (e.g. http://127.0.0.1:8081/).",
+      "recommendation": "Send 'Referrer-Policy: strict-origin-when-cross-origin' (or stricter).",
+      "parameter": null
+    },
+    {
+      "check_id": "A07-COOKIE-FLAGS",
+      "title": "Cookie 'theme' set without HttpOnly flag",
+      "severity": "Low",
+      "owasp": "A07:2021 Identification and Authentication Failures",
+      "url": "http://127.0.0.1:8081/",
+      "evidence": "Set-Cookie attributes seen: path",
+      "recommendation": "Add 'HttpOnly' so JavaScript (and therefore XSS payloads) cannot read the cookie.",
+      "parameter": "theme"
+    },
+    {
+      "check_id": "A07-COOKIE-FLAGS",
+      "title": "Cookie 'theme' set without SameSite attribute",
+      "severity": "Low",
+      "owasp": "A07:2021 Identification and Authentication Failures",
+      "url": "http://127.0.0.1:8081/",
+      "evidence": "Set-Cookie attributes seen: path",
+      "recommendation": "Add 'SameSite=Lax' (or Strict) to limit cross-site sending and reduce CSRF risk.",
+      "parameter": "theme"
+    }
+  ],
+  "not_tested": [
+    {
+      "category": "A04:2021 Insecure Design",
+      "reason": "Design flaws and business-logic abuse need understanding of intended behaviour; a generic scanner cannot judge them."
+    },
+    {
+      "category": "A09:2021 Security Logging and Monitoring Failures",
+      "reason": "Logging, alerting and incident response happen server-side and are invisible to a remote, read-only client. Review log configuration and alert rules manually."
+    },
+    {
+      "category": "A10:2021 Server-Side Request Forgery",
+      "reason": "SSRF needs an out-of-band callback server or a harmful internal target to confirm safely; this tool does not send such payloads."
+    }
+  ],
+  "limitations": [
+    "Static HTML crawler: JavaScript-rendered single-page apps (e.g. Juice Shop) expose few links/forms.",
+    "Only GET parameters and GET forms are fuzzed by default (POST needs --allow-post).",
+    "No authentication, so everything behind a login is out of scope.",
+    "Blind/time-based SQLi, DOM-based XSS, IDOR and business-logic flaws are not detected.",
+    "Signature-based detection can miss custom error pages and may flag documentation pages that quote error text."
+  ],
+  "check_errors": [],
+  "request_error_samples": []
+}

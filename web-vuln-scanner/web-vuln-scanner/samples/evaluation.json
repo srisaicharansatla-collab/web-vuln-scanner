@@ -1,0 +1,68 @@
+{
+  "vulnlab": {
+    "target": "http://127.0.0.1:8081",
+    "findings": 27,
+    "by_severity": {
+      "Critical": 1,
+      "High": 6,
+      "Medium": 14,
+      "Low": 6,
+      "Info": 0
+    },
+    "pages_crawled": 14,
+    "requests": 64,
+    "duration_s": 3.16,
+    "owasp_categories": [
+      "A01",
+      "A02",
+      "A03",
+      "A05",
+      "A06",
+      "A07",
+      "A08"
+    ],
+    "truth_items": 27,
+    "true_positives": 27,
+    "false_positives": 0,
+    "false_negatives_detectable": 0,
+    "false_negatives_by_design": [
+      "IDOR on /order?id=",
+      "Blind boolean SQLi on /blind?id=",
+      "DOM-based XSS on /dom#"
+    ],
+    "precision": 1.0,
+    "recall_detectable": 1.0,
+    "recall_overall": 0.9,
+    "fp_details": [],
+    "fn_details": []
+  },
+  "hardenedlab": {
+    "target": "http://127.0.0.1:8082",
+    "findings": 3,
+    "by_severity": {
+      "Critical": 0,
+      "High": 0,
+      "Medium": 1,
+      "Low": 2,
+      "Info": 0
+    },
+    "pages_crawled": 6,
+    "requests": 50,
+    "duration_s": 2.46,
+    "owasp_categories": [
+      "A01",
+      "A02",
+      "A05"
+    ],
+    "truth_items": 3,
+    "true_positives": 3,
+    "false_positives": 0,
+    "false_negatives_detectable": 0,
+    "false_negatives_by_design": [],
+    "precision": 1.0,
+    "recall_detectable": 1.0,
+    "recall_overall": 1.0,
+    "fp_details": [],
+    "fn_details": []
+  }
+}
